@@ -1,0 +1,23 @@
+task test3{
+    String path = getPath();
+    println "project path = $path"
+    println("project version = ${getVersion()}")
+    File bd = getBuildDir()
+    println "buildDir = ${bd.getAbsolutePath()}"
+
+//获取Project的名字
+    String name = getName()
+    println "project name = $name"
+
+//设置Project的描述信息
+    setDescription "这是一个测试案例"
+    String desc = getDescription()
+    println "project description = $desc"
+    File mkDir = mkdir("${buildDir}/test");
+    File mkDir2 = mkdir("${buildDir}/test2")
+    FileCollection fileCollection = files("${buildDir}/test", "${buildDir}/test2")
+    println "-------对文件集合进行迭代--------"
+    fileCollection.each {File f ->
+        println "遍历文件"+f.name
+    }
+}

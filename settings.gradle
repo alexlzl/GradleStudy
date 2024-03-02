@@ -1,0 +1,57 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+gradle.settingsEvaluated {
+    println "-------------settingsEvaluated start------------"
+    //假设我们要修改的是 react-native-fs 这个库当中的 build.gradle 文件
+    //先删除该文件
+    delete("${rootDir}/../node_modules/react-native-fs/android/build.gradle")
+    //我们将修改好的文件放到 ./replace-files/react-native-fs 这个目录当中
+    //前面已经删除了目标文件，现在只需将我们需要的文件复制过去即可
+    copy {
+        from("./replace-files/react-native-fs/build.gradle")
+        into("${rootDir}/../node_modules/react-native-fs/android")
+    }
+    println "-------------settingsEvaluated end------------"
+}
+gradle.addBuildListener(new BuildListener() {
+    void buildStarted(Gradle var1) {
+        println '开始构建'
+    }
+
+    void settingsEvaluated(Settings var1) {
+        println 'settings评估完成（settins.gradle中代码执行完毕）'
+        // var1.gradle.rootProject 这里访问Project对象时会报错，还未完成Project的初始化
+    }
+
+    void projectsLoaded(Gradle var1) {
+        println '项目结构加载完成（初始化阶段结束）'
+        println '初始化结束，可访问根项目：' + var1.gradle.rootProject
+    }
+
+    void projectsEvaluated(Gradle var1) {
+        println '所有项目评估完成（配置阶段结束）'
+    }
+
+    void buildFinished(BuildResult var1) {
+        println '构建结束 '
+    }
+
+    void beforeSettings(Settings settings) {
+        super.beforeSettings(settings)
+    }
+})
+rootProject.name = "Gradle"
+include 'app'
+include ':mylibrary'

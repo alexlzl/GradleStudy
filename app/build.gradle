@@ -1,0 +1,227 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+
+}
+
+
+android {
+    namespace 'com.example.gradle'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.gradle1"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+        release {// 生产环境
+//            buildConfigField("boolean", "LOG_DEBUG", "false")//配置Log日志
+//            buildConfigField("String", "URL_PERFIX", "\"https://release.cn/\"")// 配置URL前缀
+            minifyEnabled false//是否对代码进行混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//指定混淆的规则文件
+//            signingConfig signingConfigs.release//设置签名信息
+            pseudoLocalesEnabled false//是否在APK中生成伪语言环境，帮助国际化的东西，一般使用的不多
+            zipAlignEnabled true//是否对APK包执行ZIP对齐优化，减小zip体积，增加运行效率
+            applicationIdSuffix 'test'//在applicationId 中添加了一个后缀，一般使用的不多
+            versionNameSuffix 'test'//在applicationId 中添加了一个后缀，一般使用的不多
+        }
+        debug {// 测试环境
+//            buildConfigField("boolean", "LOG_DEBUG", "true")//配置Log日志
+//            buildConfigField("String", "URL_PERFIX", "\"https://test.com/\"")// 配置URL前缀
+            minifyEnabled false//是否对代码进行混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//指定混淆的规则文件
+//            signingConfig signingConfigs.debug//设置签名信息
+            debuggable false//是否支持断点调试
+            jniDebuggable false//是否可以调试NDK代码
+            renderscriptDebuggable false//是否开启渲染脚本就是一些c写的渲染方法
+            zipAlignEnabled true//是否对APK包执行ZIP对齐优化，减小zip体积，增加运行效率
+            pseudoLocalesEnabled false//是否在APK中生成伪语言环境，帮助国际化的东西，一般使用的不多
+            applicationIdSuffix 'test'//在applicationId 中添加了一个后缀，一般使用的不多
+            versionNameSuffix 'test'//在applicationId 中添加了一个后缀，一般使用的不多
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    configurations.all {
+        resolutionStrategy {
+            force 'com.github.nanchen2251:CompressHelper:1.0.5'
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def date = releaseTime()
+
+        }
+
+    }
+//    productFlavors {
+//        wandoujia {}
+//        xiaomi {}
+//        _360 {}
+//    }
+//    productFlavors.all {
+//            //批量修改，类似一个循序遍历
+//        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+//    }
+    //程序在编译的时候会检查lint，有任何错误提示会停止build，我们可以关闭这个开关
+    lintOptions {
+        abortOnError false
+        //即使报错也不会停止打包
+        checkReleaseBuilds false
+        //打包release版本的时候进行检测
+    }
+}
+
+def releaseTime() {
+    return new Date().format("yyyyMMddHHmm")
+}
+
+//task taskX {
+//    doLast {
+//        println 'taskX'
+//    }
+//}
+//
+//task taskY {
+//    // shouldRunAfter taskX
+//    mustRunAfter taskX
+//    doLast {
+//        println 'taskY'
+//    }
+//}
+//
+//task taskZ {
+//    mustRunAfter taskY
+//    doLast {
+//        println 'taskZ'
+//    }
+//}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation project(path: ':mylibrary')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+//apply(from:"test.gradle")
+//apply(from:"test1.gradle")
+//apply from:"test2.gradle"
+//apply from:"test3.gradle"
+//apply from:"test4.gradle"
+apply from: "test5.gradle"
+apply plugin: BuildTimeCostPlugin
+
+class BuildTimeCostPlugin implements Plugin<Project> {
+
+    //用来记录 task 的执行时长等信息
+    Map<String, TaskExecTimeInfo> timeCostMap = new HashMap<>()
+
+    //用来按顺序记录执行的 task 名称
+    List<String> taskPathList = new ArrayList<>()
+
+    @Override
+    void apply(Project project) {
+        project.getGradle().addListener(new TaskExecutionListener() {
+            void beforeExecute(Task task) {
+                //task开始执行之前搜集task的信息
+                TaskExecTimeInfo timeInfo = new TaskExecTimeInfo()
+                //记录开始时间
+                timeInfo.start = System.currentTimeMillis()
+                timeInfo.path = task.getPath()
+                timeCostMap.put(task.getPath(), timeInfo)
+                taskPathList.add(task.getPath())
+            }
+
+            void afterExecute(Task task, TaskState taskState) {
+                //task执行完之后，记录结束时的时间
+                TaskExecTimeInfo timeInfo = timeCostMap.get(task.getPath())
+                timeInfo.end = System.currentTimeMillis()
+                //计算该 task 的执行时长
+                timeInfo.total = timeInfo.end - timeInfo.start
+            }
+        })
+
+        //编译结束之后：
+        project.getGradle().addBuildListener(new BuildListener() {
+
+            void settingsEvaluated(Settings settings) {
+                println "---------------------------------------"
+            }
+
+            void projectsLoaded(Gradle gradle) {
+
+            }
+
+            void projectsEvaluated(Gradle gradle) {
+
+            }
+
+            void buildFinished(BuildResult buildResult) {
+                println "---------------------------------------"
+                println "---------------------------------------"
+                println "build finished, now println all task execution time:"
+                //按 task 执行顺序打印出执行时长信息
+//                for (String path : taskPathList) {
+//                    long t = timeCostMap.get(path).total
+//                    if (t >= timeCostExt.threshold) {
+//                        println("时间${path}  [${t}ms]")
+//                    }
+//                }                println "---------------------------------------"
+                println "---------------------------------------"
+            }
+        })
+
+    }
+
+
+    //关于 task 的执行信息
+    class TaskExecTimeInfo {
+        long total      //task执行总时长
+        String path
+        long start      //task 执行开始时间
+        long end        //task 结束时间
+    }
+
+}
+
+ext {
+    username = "hjy"
+    age = 30
+}
+task test2 {
+    println project.username
+    println project.ext.age
+}
+
+//foo {
+//    age = 300
+//    username = "hjy1"
+//    test "alex1"
+//}
+//task test1 {
+//    println("test1 gradle=========$project.foo")
+//    println("test1 gradle=========doLast${project.foo.age}")
+//    println("test1 gradle=========doLast${project.foo.test("tom")}")
+//}

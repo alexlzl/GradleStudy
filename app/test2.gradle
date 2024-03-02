@@ -1,0 +1,52 @@
+class Animal {
+
+    String username
+    int legs
+
+    Animal(String name) {
+        username = name
+    }
+
+    void setLegs(int c) {
+        legs = c
+    }
+
+    String toString() {
+        return "This animal is $username, it has ${legs} legs."
+    }
+
+}
+
+//子类
+class Pig extends Animal {
+
+    int age
+    String owner
+
+    Pig(int age, String owner) {
+        super("Pig")
+        this.age = age
+        this.owner = owner
+    }
+
+    String toString() {
+        return super.toString() + " Its age is $age, its owner is $owner."
+    }
+
+}
+getExtensions().add(Pig, "mypig", new Pig(5, "kobe"))
+mypig {
+    username = "MyPig"
+    legs = 4
+    age = 1
+}
+mypig {
+    username = "MyPig1"
+    legs = 40
+    age = 100
+}
+task testExt {
+    def aPig = project.getExtensions().getByName("mypig")
+    println aPig
+    println project.mypig.age
+}

@@ -1,0 +1,46 @@
+//task taskX {
+//    doLast {
+//        println 'taskX'
+//    }
+//}
+//
+//task taskY {
+//    // shouldRunAfter taskX
+//    mustRunAfter taskX
+//    doLast {
+//        println 'taskY'
+//    }
+//}
+//
+//task taskZ {
+//    mustRunAfter taskY
+//    doLast {
+//        println 'taskZ'
+//    }
+//}
+task testF{
+    println "输出task======="
+}
+
+task testW{
+    println "输出testw========"
+}
+task myTask1 {
+    println "configure task1"
+}
+
+task myTask2 {
+    println "configure task2"
+}
+
+myTask1.doFirst {
+    println "task1 doFirst"
+}
+
+myTask1.doLast {
+    println "task1 doLast"
+}
+
+myTask2.doLast {
+    println "task2 doLast"
+}

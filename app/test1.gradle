@@ -1,0 +1,31 @@
+class Foo {
+    int age
+    String username
+
+    String toString() {
+        return "name = ${username}, age = ${age}"
+    }
+
+    def test(String name) {
+        println("test======method=====${name}")
+    }
+
+}
+
+getExtensions().create("foo", Foo)
+foo {
+    age = 30
+    username = "hjy"
+    test "alex"
+}
+//task test1 {
+//    println("test1 gradle=========$project.foo")
+//    println("test1 gradle=========doLast${project.foo.age}")
+//    println("test1 gradle=========doLast${project.foo.test("tom")}")
+//}
+//test1.doLast {
+//    println("test1 gradle=========doLast${project.foo.age}")
+//    println("test1 gradle=========doLast${project.foo.test("tom")}")
+//}
+
+

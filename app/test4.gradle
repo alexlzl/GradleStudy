@@ -1,0 +1,6 @@
+task test4{
+    println "company = ${company}"
+    println "username = ${username}"
+    println username
+
+}
